@@ -2,3 +2,4 @@
 settings.py
 .ipynb_checkpoints/
 __pycache__/
+debug*

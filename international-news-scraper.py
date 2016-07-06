@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[6]:
+# In[10]:
 
 import os
 import sys
@@ -12,10 +12,16 @@ from datetime import datetime, timedelta
 import re
 from twilio.rest import TwilioRestClient
 import settings
+import logging
 import atexit
 
 
-# In[10]:
+# In[11]:
+
+logging.basicConfig(filename='debug.log',level=logging.DEBUG)
+
+
+# In[12]:
 
 # SOURCES TO SCRAPE: (filename_prefix, url, time_to_scrape, test_css_class)
 # use test_css_class to check if the expected content is on the page (otherwise the site may have changed or added an overlay or paywall)
@@ -47,7 +53,7 @@ de1 = ('de_spiegel', 'http://www.spiegel.de', '0600', 'headline')
 de2 = ('de_faz', 'http://www.faz.net', '0603', 'Headline')
 de3 = ('de_sueddeutsche', 'http://www.sueddeutsche.de', '0606', 'entry-title')
 de4 = ('de_bild', 'http://www.bild.de', '0609', 'headline')
-de5 = ('de_ard', 'www.ard.de', '0612', 'headline')
+de5 = ('de_ard', 'http://www.ard.de', '0612', 'headline')
 
 # France
 fr1 = ('fr_lemonde', 'http://www.lemonde.fr', '0615', 'titre_une')
@@ -69,7 +75,7 @@ scraping_list = [us1, us2, us3, us4, us5, us6, us7, us8, us9, us10, us11, us12,
                  gb1, gb2, gb3]
 
 
-# In[8]:
+# In[13]:
 
 # TWILIO SETTINGS - for SMS error notifications
 account_sid = settings.TWILIO_ACCOUNT_SID
@@ -77,7 +83,7 @@ auth_token = settings.TWILIO_AUTH_TOKEN
 client = TwilioRestClient(account_sid, auth_token)
 
 
-# In[9]:
+# In[14]:
 
 # SCRAPE SITE function that's called on a specific site (one at a time) when it's time to scrape a site
 def scrape_site(sitename, url, test_css_class):
@@ -89,44 +95,50 @@ def scrape_site(sitename, url, test_css_class):
         
         with open(filename, 'w') as outfile:
             outfile.write(soup.prettify())
-            print("The web page was saved locally to the file: " + filename)
+            logging.info("The web page was saved locally to the file: " + filename)
         
         if soup.find(class_=test_css_class) == None:
             alert = "WARNING! Couldn't find test_css_class on page: " + filename
+            logging.warning(alert)
             message = client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body=alert)
         
-        #alert = "Scraped: " + filename
-        #message = client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_="+16515041911", body=alert)
     except Exception as e:
-        alert = "SCRAPING ERROR: " + filename + ". ERROR: " + e
-        print(alert)      
+        alert = "SCRAPING ERROR: " + filename
+        if e:
+            alert += ". ERROR: " + str(e)
+        logging.error(alert)      
         client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body=alert)
 
 
-# In[178]:
+# In[15]:
 
 # TO SCRAPE OR NOT TO SCRAPE function that's called every minute to iterate through the scraping list and check if it's time to scrape any of the sites
 def to_scrape_or_not_to_scrape(sites_list):
     dt = datetime.utcnow().strftime("%H%M")
-    print("Current time: " + dt)   
+    logging.debug("Current time: " + dt)   
     
     for site in sites_list:
         if site[2] == dt:
-            print("Scraping site: " + site[0])
+            logging.debug("Scraping site: " + site[0])
             scrape_site(site[0], site[1], site[3])
 
 
-# In[179]:
+# In[16]:
 
 # SCRIPT EXIT function that's sends a text message anytime the script stops running so user can check if it accidentally terminated
 def script_exit():
-    alert = "SCRAPE STOPPED!"
-    client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body=alert)
+    logging.warning("SCRAPE STOPPED!")
+    client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="SCRAPE STOPPED!")
     
 atexit.register(script_exit)
 
 
-# In[180]:
+# In[17]:
+
+client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="SCRAPE STARTING!")
+
+
+# In[18]:
 
 # WHILE LOOP that executes the main to_scrape_or_not_to_scrape function at 60-second intervals
 while True:
