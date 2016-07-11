@@ -55,6 +55,8 @@ de3 = ('de_sueddeutsche', 'http://www.sueddeutsche.de', '0606', 'entry-title')
 de4 = ('de_bild', 'http://www.bild.de', '0609', 'headline')
 de5 = ('de_ard', 'http://www.ard.de', '0612', 'headline')
 
+# Austria?
+
 # France
 fr1 = ('fr_lemonde', 'http://www.lemonde.fr', '0615', 'titre_une')
 fr2 = ('fr_lefigaro', 'http://www.lefigaro.fr', '0618', 'fig-profil-headline')
@@ -67,12 +69,16 @@ gb3 = ('gb_guardian_intl', 'http://www.theguardian.com/international', '0806', '
 gb4 = ('gb_dailymail', 'http://www.dailymail.co.uk/home/index.html', '0809', 'article')
 gb5 = ('gb_sun', 'https://www.thesun.co.uk', '0812', 'teaser__headline')
 
+#Colombia
+co1=('gb_eltiempo', 'http://www.eltiempo.com/' , '2322','caja_articulo')
+
 
 scraping_list = [us1, us2, us3, us4, us5, us6, us7, us8, us9, us10, us11, us12,
                  ca1, ca2, ca3, ca4,
                  de1, de2, de3, de4, de5,
                  fr1, fr2, fr3, 
-                 gb1, gb2, gb3]
+                 gb1, gb2, gb3,
+                 co1]
 
 
 # In[13]:
@@ -90,7 +96,7 @@ def scrape_site(sitename, url, test_css_class):
     filename = sitename + "_" + datetime.utcnow().strftime("%m-%d-%Y_%H%M") + ".html"
 
     try:
-        resp = requests.get(url).text
+        resp = requests.get(url).text.encode('utf-8')
         soup = BeautifulSoup(resp, 'lxml')
         
         with open(filename, 'w') as outfile:
