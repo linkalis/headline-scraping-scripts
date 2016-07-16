@@ -74,12 +74,16 @@ gb3 = ('gb_guardian_intl', 'http://www.theguardian.com/international', '0806', '
 gb4 = ('gb_dailymail', 'http://www.dailymail.co.uk/home/index.html', '0809', 'article')
 gb5 = ('gb_sun', 'https://www.thesun.co.uk', '0812', 'teaser__headline')
 
+#Colombia
+co1=('gb_eltiempo', 'http://www.eltiempo.com/' , '2322','caja_articulo')
+
 
 scraping_list = [us1, us2, us3, us4, us5, us6, us7, us8, us9, us10, us11, us12,
                  ca1, ca2, ca3, ca4,
                  de1, de2, de3, de4, de5,
-                 fr1, fr2, fr3, 
-                 gb1, gb2, gb3]
+                 fr1, fr2, fr3,
+                 gb1, gb2, gb3,
+                 co1]
 
 
 # In[24]:
@@ -90,13 +94,11 @@ auth_token = settings.TWILIO_AUTH_TOKEN
 client = TwilioRestClient(account_sid, auth_token)
 
 
-# In[25]:
-
 # TO SCRAPE OR NOT TO SCRAPE function that's called every minute to iterate through the scraping list and check if it's time to scrape any of the sites
 def to_scrape_or_not_to_scrape(sites_list):
     dt = datetime.utcnow().strftime("%H%M")
-    logging.debug("Current time: " + dt)   
-    
+    logging.debug("Current time: " + dt)
+
     for site in sites_list:
         if site[2] == dt:
             if log_errors:
@@ -111,10 +113,10 @@ def to_scrape_or_not_to_scrape(sites_list):
 def script_exit():
     if log_errors:
         logging.warning("SCRAPE STOPPED!")
-    
+
     if send_sms_errors:
         client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="SCRAPE STOPPED!")
-    
+
 atexit.register(script_exit)
 
 
@@ -133,6 +135,3 @@ while True:
 
 
 # In[ ]:
-
-
-
