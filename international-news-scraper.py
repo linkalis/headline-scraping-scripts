@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[10]:
+# In[21]:
 
 import os
 import sys
@@ -12,16 +12,21 @@ from datetime import datetime, timedelta
 import re
 from twilio.rest import TwilioRestClient
 import settings
+import scrape_site as scraper
 import logging
 import atexit
 
 
-# In[11]:
+# In[22]:
 
-logging.basicConfig(filename='debug.log',level=logging.DEBUG)
+# Log & error settings
+logging.basicConfig(filename = 'debug.log', level = logging.DEBUG)
+
+log_errors = True
+send_sms_errors = True
 
 
-# In[12]:
+# In[23]:
 
 # SOURCES TO SCRAPE: (filename_prefix, url, time_to_scrape, test_css_class)
 # use test_css_class to check if the expected content is on the page (otherwise the site may have changed or added an overlay or paywall)
@@ -55,6 +60,8 @@ de3 = ('de_sueddeutsche', 'http://www.sueddeutsche.de', '0606', 'entry-title')
 de4 = ('de_bild', 'http://www.bild.de', '0609', 'headline')
 de5 = ('de_ard', 'http://www.ard.de', '0612', 'headline')
 
+# Austria?
+
 # France
 fr1 = ('fr_lemonde', 'http://www.lemonde.fr', '0615', 'titre_une')
 fr2 = ('fr_lefigaro', 'http://www.lefigaro.fr', '0618', 'fig-profil-headline')
@@ -75,7 +82,7 @@ scraping_list = [us1, us2, us3, us4, us5, us6, us7, us8, us9, us10, us11, us12,
                  gb1, gb2, gb3]
 
 
-# In[13]:
+# In[24]:
 
 # TWILIO SETTINGS - for SMS error notifications
 account_sid = settings.TWILIO_ACCOUNT_SID
@@ -83,34 +90,7 @@ auth_token = settings.TWILIO_AUTH_TOKEN
 client = TwilioRestClient(account_sid, auth_token)
 
 
-# In[14]:
-
-# SCRAPE SITE function that's called on a specific site (one at a time) when it's time to scrape a site
-def scrape_site(sitename, url, test_css_class):
-    filename = sitename + "_" + datetime.utcnow().strftime("%m-%d-%Y_%H%M") + ".html"
-
-    try:
-        resp = requests.get(url).text
-        soup = BeautifulSoup(resp, 'lxml')
-        
-        with open(filename, 'w') as outfile:
-            outfile.write(soup.prettify())
-            logging.info("The web page was saved locally to the file: " + filename)
-        
-        if soup.find(class_=test_css_class) == None:
-            alert = "WARNING! Couldn't find test_css_class on page: " + filename
-            logging.warning(alert)
-            message = client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body=alert)
-        
-    except Exception as e:
-        alert = "SCRAPING ERROR: " + filename
-        if e:
-            alert += ". ERROR: " + str(e)
-        logging.error(alert)      
-        client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body=alert)
-
-
-# In[15]:
+# In[25]:
 
 # TO SCRAPE OR NOT TO SCRAPE function that's called every minute to iterate through the scraping list and check if it's time to scrape any of the sites
 def to_scrape_or_not_to_scrape(sites_list):
@@ -119,26 +99,32 @@ def to_scrape_or_not_to_scrape(sites_list):
     
     for site in sites_list:
         if site[2] == dt:
-            logging.debug("Scraping site: " + site[0])
-            scrape_site(site[0], site[1], site[3])
+            if log_errors:
+                logging.debug("Scraping site: " + site[0])
+            # SCRAPE SITE function that's called on a specific site (one at a time) when it's time to scrape a site
+            scraper.scrape_site(site[0], site[1], site[3], log_errors, send_sms_errors)
 
 
-# In[16]:
+# In[26]:
 
 # SCRIPT EXIT function that's sends a text message anytime the script stops running so user can check if it accidentally terminated
 def script_exit():
-    logging.warning("SCRAPE STOPPED!")
-    client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="SCRAPE STOPPED!")
+    if log_errors:
+        logging.warning("SCRAPE STOPPED!")
+    
+    if send_sms_errors:
+        client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="SCRAPE STOPPED!")
     
 atexit.register(script_exit)
 
 
-# In[17]:
+# In[27]:
 
-client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="SCRAPE STARTING!")
+if send_sms_errors:
+    client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="SCRAPE STARTING!")
 
 
-# In[18]:
+# In[28]:
 
 # WHILE LOOP that executes the main to_scrape_or_not_to_scrape function at 60-second intervals
 while True:
