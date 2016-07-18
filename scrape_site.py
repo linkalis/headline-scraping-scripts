@@ -38,7 +38,7 @@ if __name__ == "__main__":
     sitename = sys.argv[1]
     url = sys.argv[2]
     test_css_class = sys.argv[3]
-    log_errors = False
+    log_errors = True
     send_sms_errors = False
 
     scrape_site(sitename, url, test_css_class, log_errors, send_sms_errors)
