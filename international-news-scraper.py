@@ -33,7 +33,7 @@ send_sms_errors = True
 
 # US & Canada
 us1 = ('us_nytimes', 'http://www.nytimes.com', '1200', 'story')
-us2 = ('us_nytimes_intl' 'http://international.nytimes.com', '1203', 'story')
+us2 = ('us_nytimes_intl', 'http://international.nytimes.com', '1203', 'story')
 us3 = ('us_cnn', 'http://us.cnn.com', '1206', 'cd__headline')
 us4 = ('us_cnn_intl', 'http://edition.cnn.com/', '1209', 'cd__headline')
 us5 = ('us_usatoday', 'http://www.usatoday.com', '1212', 'js-asset-headline')
@@ -75,7 +75,7 @@ gb4 = ('gb_dailymail', 'http://www.dailymail.co.uk/home/index.html', '0809', 'ar
 gb5 = ('gb_sun', 'https://www.thesun.co.uk', '0812', 'teaser__headline')
 
 #Colombia
-co1=('gb_eltiempo', 'http://www.eltiempo.com/' , '2309','caja_articulo')
+co1=('gb_eltiempo', 'http://www.eltiempo.com/', '1309','caja_articulo')
 
 
 scraping_list = [us1, us2, us3, us4, us5, us6, us7, us8, us9, us10, us11, us12,
