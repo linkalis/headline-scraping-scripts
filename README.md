@@ -1,16 +1,22 @@
 # Headline Scraping Scripts
 
-## Usage Notes
+> A webscraper tool using cron on a Raspberry Pi. Also includes optional Twilio text alerts to let you know when your scrapes fail.
+
+## 1) Install requirements
 
 1. Install BeautifulSoup: `pip install beautifulsoup4` (or `pip3 install beautifulsoup4` on Raspberry Pi)
 2. Install Twilio python helper library: `pip install twilio` (or `pip3 install twilio` on Raspberry Pi)
 3. Install libxml2: `apt-get install libxml2`
-4. Install lxml: `pip install lxml` (or `pip3 install lxml` on Raspberry Pi)
-4. Install datetime: `pip install datetime` (or `pip3 install datetime` on Raspberry Pi)
+4. Install lxml: `apt-get install python3-lxml`
+5. Install datetime: `pip install datetime` (or `pip3 install datetime` on Raspberry Pi)
 
-*** Add requirements.txt file instead of individual installs?
+IMPROVEMENT IDEA: Add requirements.txt file instead of individual installs?
 
-4. Create a settings.py file with the following information.  Place this file in the top-level project folder so that the scrape_site.py script can import it:
+## 2) Set up Twilio
+
+If you want to receive text alerts when the scrapes fail, you'll need to set up a Twilio account at Twilio.com.  You can simply sign up for a free trial account, make sure you create a Twilio phone number to send texts from, then find your Twilio SID and auth token.
+
+Next, create a settings.py file and place this file in the top-level project folder so that the scrape_site.py script can import it.  Add the following information to settings.py:
 
 ```
 TWILIO_ACCOUNT_SID = "your Twilio account sid here"
@@ -19,10 +25,33 @@ TWILIO_PHONE_NUMBER = "+15555555555"
 ALERT_PHONE_NUMBER = "+15555555555"
 ```
 
+If you **do not** want receive text alerts about the scrapes, simply change the following line in scrape_site.py: `send_sms_errors = True`.  Then, you can comment out all of the lines under "TWILIO SETTINGS" in scrape_site.py.
 
-## To use on Raspberry Pi...
+## 3) Make sure the Raspberry Pi's clock is accurate on startup
 
-### 1) Make sure time is updating on startup
+If the clock is inaccurate, you may need to force reset it using: `date -s "2016-08-30 20:10:05"`
+
+## 4) Set up your crontab
+
+Scrapes are triggered using cron.  To get started, copy the entire contents of the `crontab` file in this repo into your Pi's crontab by doing the following:
+
+1. Open up the Pi's crontab for editing using crontab -e
+2. Select nano (woot woot!) as your editor
+3. At the bottom of the crontab, below the comments, do [CTRL] + [R]
+4. Enter the full pathname to the crontab file from this repo (for example: /home/pi/headline-scraping-scripts/crontab), then hit [ENTER].  This should copy the entire contents of the file into your actual crontab.
+
+If you want to make sure these cron jobs loaded correctly, you can install a cron graphical editor on Raspberry Pi (`apt-get install gnome-schedule`).  Then, you can check **System Tools** > **Scheduled Tasks**, and you should see all of the scraping jobs listed in there.
+
+If there are other websites you want to scrape, simply add a line for each site to your crontab in the following format.  For example, this will trigger a scrape of example.com every day at 9:30 in the morning:
+
+`30 9 * * * python3 /path/to/scrape_site.py 'sitename' 'http://www.example.com' 'test_css_class'`
+
+## 5) Scrape all the things!
+
+**[FIN]**
+
+
+## Junk
 
 http://raspberrypi.stackexchange.com/questions/8231/how-to-force-ntpd-to-update-date-time-after-boot
 
