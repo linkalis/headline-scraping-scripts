@@ -1,17 +1,23 @@
-# Usage Notes
+# Headline Scraping Scripts
 
-1. Install BeautifulSoup
-2. Install lxml: `pip install lxml` (or `pip3 install lxml` on Raspberry Pi)
-3. Install Twilio
-4. Install datetime
+## Usage Notes
+
+1. Install BeautifulSoup: `pip install beautifulsoup4` (or `pip3 install beautifulsoup4` on Raspberry Pi)
+2. Install Twilio python helper library: `pip install twilio` (or `pip3 install twilio` on Raspberry Pi)
+3. Install libxml2: `apt-get install libxml2`
+4. Install lxml: `pip install lxml` (or `pip3 install lxml` on Raspberry Pi)
+4. Install datetime: `pip install datetime` (or `pip3 install datetime` on Raspberry Pi)
 
 *** Add requirements.txt file instead of individual installs?
 
-4. Create a settings.py file with the following:
-`TWILIO_ACCOUNT_SID = "your Twilio account sid here"
+4. Create a settings.py file with the following information.  Place this file in the top-level project folder so that the scrape_site.py script can import it:
+
+```
+TWILIO_ACCOUNT_SID = "your Twilio account sid here"
 TWILIO_AUTH_TOKEN = "your Twilio auth token here"
 TWILIO_PHONE_NUMBER = "+15555555555"
-ALERT_PHONE_NUMBER = "+15555555555"`
+ALERT_PHONE_NUMBER = "+15555555555"
+```
 
 
 ## To use on Raspberry Pi...
@@ -41,7 +47,7 @@ add line:
 
 ### 2) Run the script as python3
 
-The newest versions of Raspbian have both Python 2.7 and Python 3.  This script is written in Python 3, so you will need to run it via `python3 name_of_script.py`, rather than using plain `python`.
+The newest versions of Raspbian for Raspberry Pi have both Python 2.7 and Python 3 pre-installed.  This script is written in Python 3, so you will need to run it via `python3 name_of_script.py`, rather than using plain `python`.
 
 ### 3) Run the script at startup
 
