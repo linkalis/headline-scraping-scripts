@@ -35,9 +35,7 @@ def scrape_site(sitename, url, test_css_class, log_errors, send_sms_errors):
             outfile.write(soup.prettify())
             if log_errors:
                 logging.info("The web page was saved locally to the file: " + filename)
-            if send_sms_errors:
-                message = client.messages.create(to=settings.ALERT_PHONE_NUMBER, from_=settings.TWILIO_PHONE_NUMBER, body="Successfully scraped: " + filename)
-
+            
         if soup.find(class_=test_css_class) == None:
             alert = "WARNING! Couldn't find test_css_class on page: " + filename
             if log_errors:
